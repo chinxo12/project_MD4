@@ -1,6 +1,11 @@
 package ra.model.service;
 
+import ra.model.entity.Image;
+import ra.model.entity.ImageFeedBack;
+
+import java.util.List;
+
 public interface FeedBackImageSevice {
-    FeedBackImageSevice save(FeedBackSevice feedBackSevice);
-    void delete(int id);
+    ImageFeedBack save(ImageFeedBack feedBackSevice);
+    void delete(List<ImageFeedBack> list);
 }

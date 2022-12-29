@@ -10,6 +10,7 @@ import javax.persistence.*;
 @Table(name = "imagefeedback")
 public class ImageFeedBack {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "imageId")
     private int imageFeedBackId;
     @Column(name = "imageLink")

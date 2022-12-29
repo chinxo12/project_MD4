@@ -12,6 +12,7 @@ import java.util.List;
 @Table(name = "feedback")
 public class FeedBack {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "feedBackId")
     private int feedBackId;
     @Column(name = "feedBack")
@@ -22,8 +23,9 @@ public class FeedBack {
     private Users users;
     @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnore
-    @JoinColumn(name = "productId")
-    private Product product;
+    @JoinColumn(name = "productDetailId")
+    private ProductDetail productDetail;
     @OneToMany(mappedBy = "feedBack")
     private List<ImageFeedBack> listImage = new ArrayList<>();
+    private int star;
 }

@@ -66,20 +66,26 @@ public class CartController {
     public ResponseEntity<?> addToCart(@RequestBody CartRequest cartRequest){
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean check =true;
+        boolean checkExit = false;
         List<Cart> listCart = cartSevice.findAll(customUserDetails.getUserId());
+        Cart cart = new Cart();
         try {
             for (Cart cart1 :listCart) {
                 if (cart1.getProductDetail().getProductDetailId()==cartRequest.getProductDetailId()){
-                    cart1.setQuantity(cart1.getQuantity()+cartRequest.getQuantity());
-                    cart1 = cartSevice.insertCard(cart1);
-                }else {
-                    Cart cart = new Cart();
-                    cart.setQuantity(cartRequest.getQuantity());
-                    cart.setProductDetail(productDetailSevice.findById(cartRequest.getProductDetailId()));
-                    cart.setTotalPrice(cart.getProductDetail().getPrice()*cart.getQuantity());
-                    cart.setUsers(userService.findById(customUserDetails.getUserId()));
-                    cart = cartSevice.insertCard(cart);
+                    cart = cart1;
+                    checkExit = true;
+                    break;
                 }
+            }
+            if (checkExit){
+                cart.setQuantity(cart.getQuantity()+cartRequest.getQuantity());
+                cart = cartSevice.insertCard(cart);
+            }else {
+                cart.setQuantity(cartRequest.getQuantity());
+                cart.setProductDetail(productDetailSevice.findById(cartRequest.getProductDetailId()));
+                cart.setTotalPrice(cart.getProductDetail().getPrice()*cart.getQuantity());
+                cart.setUsers(userService.findById(customUserDetails.getUserId()));
+                cart = cartSevice.insertCard(cart);
             }
         }catch (Exception e){
             check = false;

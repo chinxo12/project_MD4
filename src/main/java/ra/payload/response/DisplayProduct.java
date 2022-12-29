@@ -14,6 +14,8 @@ public class DisplayProduct {
    private String productName;
    private boolean productStatus;
    private Catalog catalog;
-
-   private List<ProductDetail> listProductDetail = new ArrayList<>();
+   private int productAvailable;
+   private float stars;
+   private List<ProductDetailResponse> listProductDetail = new ArrayList<>();
+   private List<FeedBackResponse> listFeedBack = new ArrayList<>();
 }

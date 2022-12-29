@@ -13,6 +13,8 @@ import ra.payload.request.ProductRequest;
 import ra.payload.request.SizeColorRequest;
 import ra.payload.response.DisplayProduct;
 import ra.payload.request.ProductDetailRequest;
+import ra.payload.response.FeedBackResponse;
+import ra.payload.response.ProductDetailResponse;
 import ra.security.CustomUserDetails;
 
 
@@ -42,6 +44,8 @@ public class ProductController {
     private ColorSevice colorSevice;
     @Autowired
     private FeedBackSevice feedBackSevice;
+    @Autowired
+    private FeedBackImageSevice feedBackImageSevice;
 
 
     @GetMapping("getAllProduct")
@@ -52,14 +56,42 @@ public class ProductController {
         List<Product> listProduct = productSevice.getAllByUserId(customUserDetails.getUserId());
         for (Product pro :listProduct) {
             DisplayProduct displayProduct = new DisplayProduct();
+            int productAvailable = 0;
+            int star = 0;
+            int count = 0;
             displayProduct.setProductId(pro.getProductId());
             displayProduct.setProductName(pro.getProductName());
             displayProduct.setProductStatus(pro.isProductStatus());
             displayProduct.setCatalog(pro.getCatalog());
-            displayProduct.getListProductDetail().addAll(pro.getListProductDetail());
+            for (ProductDetail proDetail :pro.getListProductDetail()) {
+                ProductDetailResponse proDetailResponse = new ProductDetailResponse();
+                proDetailResponse.setProductDetailId(proDetail.getProductDetailId());
+                proDetailResponse.setSizeName(proDetail.getSize().getSizeName());
+                proDetailResponse.setColorName(proDetail.getColor().getColorName());
+                proDetailResponse.setQuantity(proDetail.getQuantity());
+                proDetailResponse.setSoldQuantity(proDetail.getSoldQuantity());
+                proDetailResponse.setPrice(proDetail.getPrice());
+                displayProduct.getListProductDetail().add(proDetailResponse);
+                for (FeedBack feedBack :proDetail.getListFeedBack()) {
+                    FeedBackResponse feedBackResponse = new FeedBackResponse();
+                    feedBackResponse.setStar(feedBack.getStar());
+                    feedBackResponse.setUserName(feedBack.getUsers().getUserName());
+                    feedBackResponse.setSizeName(feedBack.getProductDetail().getSize().getSizeName());
+                    feedBackResponse.setColorName(feedBack.getProductDetail().getColor().getColorName());
+                    for (ImageFeedBack images :feedBack.getListImage()) {
+                        feedBackResponse.getListImage().add(images.getImageLink());
+                    }
+                    star+=feedBack.getStar();
+                    count++;
+                }
+                productAvailable+=proDetail.getQuantity();
+            }
+            displayProduct.setProductAvailable(productAvailable);
+            if (count!=0){
+                displayProduct.setStars(star/count);
+            }
             listDisplayProduct.add(displayProduct);
         }
-
         return ResponseEntity.ok(listDisplayProduct);
     }
     @PostMapping("createProduct")
@@ -191,14 +223,46 @@ public class ProductController {
         List<DisplayProduct> list = new ArrayList<>();
         for (Product pro :listProduct) {
             DisplayProduct displayProduct = new DisplayProduct();
+            int productAvailable = 0;
+            int star = 0;
+            int count = 1;
             displayProduct.setProductId(pro.getProductId());
             displayProduct.setProductName(pro.getProductName());
             displayProduct.setProductStatus(pro.isProductStatus());
             displayProduct.setCatalog(pro.getCatalog());
-            displayProduct.getListProductDetail().addAll(pro.getListProductDetail());
+            for (ProductDetail proDetail :pro.getListProductDetail()) {
+                ProductDetailResponse proDetailResponse = new ProductDetailResponse();
+                proDetailResponse.setProductDetailId(proDetail.getProductDetailId());
+                proDetailResponse.setSizeName(proDetail.getSize().getSizeName());
+                proDetailResponse.setColorName(proDetail.getColor().getColorName());
+                proDetailResponse.setQuantity(proDetail.getQuantity());
+                proDetailResponse.setSoldQuantity(proDetail.getSoldQuantity());
+                proDetailResponse.setPrice(proDetail.getPrice());
+                displayProduct.getListProductDetail().add(proDetailResponse);
+                for (FeedBack feedBack :proDetail.getListFeedBack()) {
+                    FeedBackResponse feedBackResponse = new FeedBackResponse();
+                    feedBackResponse.setStar(feedBack.getStar());
+                    feedBackResponse.setUserName(feedBack.getUsers().getUserName());
+                    feedBackResponse.setSizeName(feedBack.getProductDetail().getSize().getSizeName());
+                    feedBackResponse.setColorName(feedBack.getProductDetail().getColor().getColorName());
+                    for (ImageFeedBack images :feedBack.getListImage()) {
+                        feedBackResponse.getListImage().add(images.getImageLink());
+                    }
+                    star+=feedBack.getStar();
+                    count++;
+                }
+                productAvailable+=proDetail.getQuantity();
+            }
+            displayProduct.setProductAvailable(productAvailable);
+            displayProduct.setStars(star/count);
             list.add(displayProduct);
         }
-        return ResponseEntity.ok(listProduct);
+        int totalPage = productSevice.getTotalList(customUserDetails.getUserId(),size);
+        Map<String,Object> displayValue = new HashMap<>();
+        displayValue.put("totalPage",totalPage);
+        displayValue.put("listProduct",list);
+
+        return ResponseEntity.ok(displayValue);
     }
     @GetMapping("searchByName")
         public ResponseEntity<?> searchByName(@RequestParam("searchName") String name ){
@@ -206,14 +270,44 @@ public class ProductController {
         List<DisplayProduct> list = new ArrayList<>();
         for (Product pro :listProduct) {
             DisplayProduct displayProduct = new DisplayProduct();
+            int productAvailable = 0;
+            int star = 0;
+            int count = 0;
             displayProduct.setProductId(pro.getProductId());
             displayProduct.setProductName(pro.getProductName());
             displayProduct.setProductStatus(pro.isProductStatus());
             displayProduct.setCatalog(pro.getCatalog());
-            displayProduct.getListProductDetail().addAll(pro.getListProductDetail());
+            for (ProductDetail proDetail :pro.getListProductDetail()) {
+                ProductDetailResponse proDetailResponse = new ProductDetailResponse();
+                proDetailResponse.setProductDetailId(proDetail.getProductDetailId());
+                proDetailResponse.setSizeName(proDetail.getSize().getSizeName());
+                proDetailResponse.setColorName(proDetail.getColor().getColorName());
+                proDetailResponse.setQuantity(proDetail.getQuantity());
+                proDetailResponse.setSoldQuantity(proDetail.getSoldQuantity());
+                proDetailResponse.setPrice(proDetail.getPrice());
+                displayProduct.getListProductDetail().add(proDetailResponse);
+                for (FeedBack feedBack :proDetail.getListFeedBack()) {
+                    FeedBackResponse feedBackResponse = new FeedBackResponse();
+                    feedBackResponse.setStar(feedBack.getStar());
+                    feedBackResponse.setUserName(feedBack.getUsers().getUserName());
+                    feedBackResponse.setSizeName(feedBack.getProductDetail().getSize().getSizeName());
+                    feedBackResponse.setColorName(feedBack.getProductDetail().getColor().getColorName());
+                    for (ImageFeedBack images :feedBack.getListImage()) {
+                        feedBackResponse.getListImage().add(images.getImageLink());
+                    }
+                    displayProduct.getListFeedBack().add(feedBackResponse);
+                    star+=feedBack.getStar();
+                    count++;
+                }
+                productAvailable+=proDetail.getQuantity();
+            }
+            displayProduct.setProductAvailable(productAvailable);
+            if (count!=0){
+                displayProduct.setStars(star/count);
+            }
             list.add(displayProduct);
         }
-        return ResponseEntity.ok(listProduct);
+        return ResponseEntity.ok(list);
     }
 
     @GetMapping("softByName")
@@ -226,17 +320,46 @@ public class ProductController {
         List<DisplayProduct> list = new ArrayList<>();
         for (Product pro :listProduct) {
             DisplayProduct displayProduct = new DisplayProduct();
+            int productAvailable = 0;
+            int star = 0;
+            int count = 0;
             displayProduct.setProductId(pro.getProductId());
             displayProduct.setProductName(pro.getProductName());
             displayProduct.setProductStatus(pro.isProductStatus());
             displayProduct.setCatalog(pro.getCatalog());
-            displayProduct.getListProductDetail().addAll(pro.getListProductDetail());
+            for (ProductDetail proDetail :pro.getListProductDetail()) {
+                ProductDetailResponse proDetailResponse = new ProductDetailResponse();
+                proDetailResponse.setProductDetailId(proDetail.getProductDetailId());
+                proDetailResponse.setSizeName(proDetail.getSize().getSizeName());
+                proDetailResponse.setColorName(proDetail.getColor().getColorName());
+                proDetailResponse.setQuantity(proDetail.getQuantity());
+                proDetailResponse.setSoldQuantity(proDetail.getSoldQuantity());
+                proDetailResponse.setPrice(proDetail.getPrice());
+                displayProduct.getListProductDetail().add(proDetailResponse);
+                for (FeedBack feedBack :proDetail.getListFeedBack()) {
+                    FeedBackResponse feedBackResponse = new FeedBackResponse();
+                    feedBackResponse.setStar(feedBack.getStar());
+                    feedBackResponse.setUserName(feedBack.getUsers().getUserName());
+                    feedBackResponse.setSizeName(feedBack.getProductDetail().getSize().getSizeName());
+                    feedBackResponse.setColorName(feedBack.getProductDetail().getColor().getColorName());
+                    for (ImageFeedBack images :feedBack.getListImage()) {
+                        feedBackResponse.getListImage().add(images.getImageLink());
+                    }
+                    displayProduct.getListFeedBack().add(feedBackResponse);
+                    star+=feedBack.getStar();
+                    count++;
+                }
+                productAvailable+=proDetail.getQuantity();
+            }
+            displayProduct.setProductAvailable(productAvailable);
+            if (count!=0){
+                displayProduct.setStars(star/count);
+            }
             list.add(displayProduct);
         }
         Map<String,Object> displayValue = new HashMap<>();
         displayValue.put("totalPage",totalPage);
-        displayValue.put("listProduct",listProduct);
-
+        displayValue.put("listProduct",list);
         return ResponseEntity.ok(displayValue);
     }
 
@@ -250,16 +373,46 @@ public class ProductController {
         List<DisplayProduct> list = new ArrayList<>();
         for (Product pro :listProduct) {
             DisplayProduct displayProduct = new DisplayProduct();
+            int productAvailable = 0;
+            int star = 0;
+            int count = 0;
             displayProduct.setProductId(pro.getProductId());
             displayProduct.setProductName(pro.getProductName());
             displayProduct.setProductStatus(pro.isProductStatus());
             displayProduct.setCatalog(pro.getCatalog());
-            displayProduct.getListProductDetail().addAll(pro.getListProductDetail());
+            for (ProductDetail proDetail :pro.getListProductDetail()) {
+                ProductDetailResponse proDetailResponse = new ProductDetailResponse();
+                proDetailResponse.setProductDetailId(proDetail.getProductDetailId());
+                proDetailResponse.setSizeName(proDetail.getSize().getSizeName());
+                proDetailResponse.setColorName(proDetail.getColor().getColorName());
+                proDetailResponse.setQuantity(proDetail.getQuantity());
+                proDetailResponse.setSoldQuantity(proDetail.getSoldQuantity());
+                proDetailResponse.setPrice(proDetail.getPrice());
+                displayProduct.getListProductDetail().add(proDetailResponse);
+                for (FeedBack feedBack :proDetail.getListFeedBack()) {
+                    FeedBackResponse feedBackResponse = new FeedBackResponse();
+                    feedBackResponse.setStar(feedBack.getStar());
+                    feedBackResponse.setUserName(feedBack.getUsers().getUserName());
+                    feedBackResponse.setSizeName(feedBack.getProductDetail().getSize().getSizeName());
+                    feedBackResponse.setColorName(feedBack.getProductDetail().getColor().getColorName());
+                    for (ImageFeedBack images :feedBack.getListImage()) {
+                        feedBackResponse.getListImage().add(images.getImageLink());
+                    }
+                    displayProduct.getListFeedBack().add(feedBackResponse);
+                    star+=feedBack.getStar();
+                    count++;
+                }
+                productAvailable+=proDetail.getQuantity();
+            }
+            displayProduct.setProductAvailable(productAvailable);
+            if (count!=0){
+                displayProduct.setStars(star/count);
+            }
             list.add(displayProduct);
         }
         Map<String,Object> displayValue = new HashMap<>();
         displayValue.put("totalPage",totalPage);
-        displayValue.put("listProduct",listProduct);
+        displayValue.put("listProduct",list);
 
         return ResponseEntity.ok(displayValue);
     }
@@ -279,12 +432,42 @@ public class ProductController {
             displayProduct.setProductName(pro.getProductName());
             displayProduct.setProductStatus(pro.isProductStatus());
             displayProduct.setCatalog(pro.getCatalog());
-            displayProduct.getListProductDetail().addAll(pro.getListProductDetail());
+            int productAvailable = 0;
+            int star = 0;
+            int count = 0;
+            for (ProductDetail proDetail :pro.getListProductDetail()) {
+                ProductDetailResponse proDetailResponse = new ProductDetailResponse();
+                proDetailResponse.setProductDetailId(proDetail.getProductDetailId());
+                proDetailResponse.setSizeName(proDetail.getSize().getSizeName());
+                proDetailResponse.setColorName(proDetail.getColor().getColorName());
+                proDetailResponse.setQuantity(proDetail.getQuantity());
+                proDetailResponse.setSoldQuantity(proDetail.getSoldQuantity());
+                proDetailResponse.setPrice(proDetail.getPrice());
+                displayProduct.getListProductDetail().add(proDetailResponse);
+                for (FeedBack feedBack :proDetail.getListFeedBack()) {
+                    FeedBackResponse feedBackResponse = new FeedBackResponse();
+                    feedBackResponse.setStar(feedBack.getStar());
+                    feedBackResponse.setUserName(feedBack.getUsers().getUserName());
+                    feedBackResponse.setSizeName(feedBack.getProductDetail().getSize().getSizeName());
+                    feedBackResponse.setColorName(feedBack.getProductDetail().getColor().getColorName());
+                    for (ImageFeedBack images :feedBack.getListImage()) {
+                        feedBackResponse.getListImage().add(images.getImageLink());
+                    }
+                    displayProduct.getListFeedBack().add(feedBackResponse);
+                    star+=feedBack.getStar();
+                    count++;
+                }
+                productAvailable+=proDetail.getQuantity();
+            }
+            displayProduct.setProductAvailable(productAvailable);
+            if (count!=0){
+                displayProduct.setStars(star/count);
+            }
             list.add(displayProduct);
         }
         Map<String,Object> displayValue = new HashMap<>();
         displayValue.put("totalPage",totalPage);
-        displayValue.put("listProduct",listProduct);
+        displayValue.put("listProduct",list);
 
         return ResponseEntity.ok(displayValue);
     }
@@ -296,22 +479,61 @@ public class ProductController {
         displayProduct.setProductName(pro.getProductName());
         displayProduct.setProductStatus(pro.isProductStatus());
         displayProduct.setCatalog(pro.getCatalog());
-        displayProduct.getListProductDetail().addAll(pro.getListProductDetail());
+        int productAvailable = 0;
+        int star = 0;
+        int count = 0;
+        for (ProductDetail proDetail :pro.getListProductDetail()) {
+            ProductDetailResponse proDetailResponse = new ProductDetailResponse();
+            proDetailResponse.setProductDetailId(proDetail.getProductDetailId());
+            proDetailResponse.setSizeName(proDetail.getSize().getSizeName());
+            proDetailResponse.setColorName(proDetail.getColor().getColorName());
+            proDetailResponse.setQuantity(proDetail.getQuantity());
+            proDetailResponse.setSoldQuantity(proDetail.getSoldQuantity());
+            proDetailResponse.setPrice(proDetail.getPrice());
+            displayProduct.getListProductDetail().add(proDetailResponse);
+            for (FeedBack feedBack :proDetail.getListFeedBack()) {
+                FeedBackResponse feedBackResponse = new FeedBackResponse();
+                feedBackResponse.setStar(feedBack.getStar());
+                feedBackResponse.setUserName(feedBack.getUsers().getUserName());
+                feedBackResponse.setSizeName(feedBack.getProductDetail().getSize().getSizeName());
+                feedBackResponse.setColorName(feedBack.getProductDetail().getColor().getColorName());
+                for (ImageFeedBack images :feedBack.getListImage()) {
+                    feedBackResponse.getListImage().add(images.getImageLink());
+                }
+                displayProduct.getListFeedBack().add(feedBackResponse);
+                star+=feedBack.getStar();
+                count++;
+            }
+            productAvailable+=proDetail.getQuantity();
+        }
+        displayProduct.setProductAvailable(productAvailable);
+        if (count!=0){
+            displayProduct.setStars(star/count);
+        }
         return ResponseEntity.ok(displayProduct);
     }
-    @PostMapping("addFeedBack/{productId}")
-    public ResponseEntity<?> addFeedBack(@RequestBody FeedBackRequest feedBackRequest,@PathVariable("productId")int productId){
+    @PostMapping("addFeedBack/{productDetailId}")
+    public ResponseEntity<?> addFeedBack(@RequestBody FeedBackRequest feedBackRequest,@PathVariable("productDetailId")int productDetailId){
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Users users = userService.findById(customUserDetails.getUserId());
-        Product product = productSevice.findById(productId);
         FeedBack feedBack = new FeedBack();
         feedBack.setFeedBack(feedBackRequest.getFeedback());
-        feedBack = feedBackSevice.saveOrUpdate(feedBack);
-        for (String str :feedBackRequest.getListImage()) {
-            ImageFeedBack image = new ImageFeedBack();
-            image.setFeedBack(feedBack);
-            image.setImageLink(str);
-
+        feedBack.setUsers(userService.findById(users.getUserId()));
+        feedBack.setProductDetail(productDetailSevicel.findById(productDetailId));
+        feedBack.setStar(feedBackRequest.getStar());
+        try {
+            feedBack = feedBackSevice.saveOrUpdate(feedBack);
+            for (String str :feedBackRequest.getListImage()) {
+                ImageFeedBack image = new ImageFeedBack();
+                image.setFeedBack(feedBack);
+                image.setImageLink(str);
+                image = feedBackImageSevice.save(image);
+            }
+            return ResponseEntity.ok("Thêm phản hồi thành công!");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.ok("Thêm phản hồi thất bại!");
         }
+
     }
 }

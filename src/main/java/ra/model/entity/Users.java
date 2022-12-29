@@ -35,4 +35,8 @@ public class Users {
     @JsonIgnore
     @OneToMany(mappedBy = "users")
     List<Product> listProduct = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "wishlist",joinColumns = @JoinColumn(name = "userId"),
+            inverseJoinColumns = @JoinColumn(name = "productId"))
+    private Set<Product> wishList = new HashSet<>();
 }

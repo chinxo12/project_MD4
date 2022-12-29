@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "productdetail")
@@ -32,4 +34,6 @@ public class ProductDetail {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "colorId")
     private Color color;
+    @OneToMany(mappedBy = "productDetail")
+    List<FeedBack> listFeedBack = new ArrayList<>();
 }

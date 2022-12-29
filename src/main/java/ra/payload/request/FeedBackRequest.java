@@ -9,4 +9,5 @@ import java.util.List;
 public class FeedBackRequest {
     private String feedback;
     private List<String> listImage = new ArrayList<>();
+    private int star;
 }

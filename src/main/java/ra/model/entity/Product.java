@@ -35,6 +35,5 @@ public class Product {
     Set<Image> listImage = new HashSet<>();
     @OneToMany(fetch = FetchType.EAGER,mappedBy = "product")
     List<ProductDetail> listProductDetail = new ArrayList<>();
-    @OneToMany(mappedBy = "product")
-    List<FeedBack> listFeedBack = new ArrayList<>();
+
 }
