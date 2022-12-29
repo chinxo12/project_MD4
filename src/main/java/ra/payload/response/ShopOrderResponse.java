@@ -3,9 +3,8 @@ package ra.payload.response;
 import lombok.Data;
 
 import java.util.Date;
-
 @Data
-public class OrderDetailResponse {
+public class ShopOrderResponse {
     private int orderId;
     private String productName;
     private int quantity;
@@ -15,5 +14,5 @@ public class OrderDetailResponse {
     private String ColorName;
     private Date createDate;
     private boolean orderStatus;
-    private String shopName;
+    private String userName;
 }

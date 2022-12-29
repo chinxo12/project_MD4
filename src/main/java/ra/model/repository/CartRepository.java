@@ -16,4 +16,5 @@ public interface CartRepository extends JpaRepository<Cart,Integer> {
 
     @Query(value = "select ceil(count(cartId)/:size1) from cart p where p.userId= :uId",nativeQuery = true)
     int totalPage(@Param("uId")int id,@Param("size1")int size);
+    List<Cart> findByUsers_UserId(int id);
 }

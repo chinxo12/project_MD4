@@ -5,12 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import ra.model.entity.Catalog;
-import ra.model.entity.Image;
-import ra.model.entity.Product;
-import ra.model.entity.ProductDetail;
+import ra.model.entity.*;
 import ra.model.repository.ProductDetailRepository;
 import ra.model.service.*;
+import ra.payload.request.FeedBackRequest;
 import ra.payload.request.ProductRequest;
 import ra.payload.request.SizeColorRequest;
 import ra.payload.response.DisplayProduct;
@@ -24,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@PreAuthorize("hasRole('USER')")
 @CrossOrigin("http://localhost:8080")
 @RequestMapping("/api/v1/auth/product")
 public class ProductController {
@@ -41,6 +40,8 @@ public class ProductController {
     private SizeSevice sizeSevice;
     @Autowired
     private ColorSevice colorSevice;
+    @Autowired
+    private FeedBackSevice feedBackSevice;
 
 
     @GetMapping("getAllProduct")
@@ -297,5 +298,20 @@ public class ProductController {
         displayProduct.setCatalog(pro.getCatalog());
         displayProduct.getListProductDetail().addAll(pro.getListProductDetail());
         return ResponseEntity.ok(displayProduct);
+    }
+    @PostMapping("addFeedBack/{productId}")
+    public ResponseEntity<?> addFeedBack(@RequestBody FeedBackRequest feedBackRequest,@PathVariable("productId")int productId){
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Users users = userService.findById(customUserDetails.getUserId());
+        Product product = productSevice.findById(productId);
+        FeedBack feedBack = new FeedBack();
+        feedBack.setFeedBack(feedBackRequest.getFeedback());
+        feedBack = feedBackSevice.saveOrUpdate(feedBack);
+        for (String str :feedBackRequest.getListImage()) {
+            ImageFeedBack image = new ImageFeedBack();
+            image.setFeedBack(feedBack);
+            image.setImageLink(str);
+
+        }
     }
 }

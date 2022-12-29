@@ -64,39 +64,50 @@ public class CartController {
     @PreAuthorize("hasRole('USER')")
     @PostMapping("addToCart")
     public ResponseEntity<?> addToCart(@RequestBody CartRequest cartRequest){
-        Cart cart = new Cart();
-        cart.setQuantity(cartRequest.getQuantity());
-        cart.setProductDetail(productDetailSevice.findById(cartRequest.getProductDetailId()));
-        cart.setTotalPrice(cart.getProductDetail().getPrice()*cart.getQuantity());
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        cart.setUsers(userService.findById(customUserDetails.getUserId()));
+        boolean check =true;
+        List<Cart> listCart = cartSevice.findAll(customUserDetails.getUserId());
         try {
-            cart = cartSevice.insertCard(cart);
-            return ResponseEntity.ok("Thêm sản phẩm vào giỏ hàng thành công!!!");
+            for (Cart cart1 :listCart) {
+                if (cart1.getProductDetail().getProductDetailId()==cartRequest.getProductDetailId()){
+                    cart1.setQuantity(cart1.getQuantity()+cartRequest.getQuantity());
+                    cart1 = cartSevice.insertCard(cart1);
+                }else {
+                    Cart cart = new Cart();
+                    cart.setQuantity(cartRequest.getQuantity());
+                    cart.setProductDetail(productDetailSevice.findById(cartRequest.getProductDetailId()));
+                    cart.setTotalPrice(cart.getProductDetail().getPrice()*cart.getQuantity());
+                    cart.setUsers(userService.findById(customUserDetails.getUserId()));
+                    cart = cartSevice.insertCard(cart);
+                }
+            }
         }catch (Exception e){
+            check = false;
             e.printStackTrace();
+        }
+        if (check){
+
+            return ResponseEntity.ok("Thêm sản phẩm vào giỏ hàng thành công!!!");
+        }else {
+
             return ResponseEntity.ok("Thêm sản phẩm vào giỏ hàng thất bại!");
         }
 
     }
     @PutMapping("updateCart")
-    public ResponseEntity<?> updateCart(@RequestBody CartRequest cartRequest,@RequestParam("cartId") int cartId){
-        Cart cart = cartSevice.findById(cartId);
-        ProductDetail productDetail = productDetailSevice.findById(cartRequest.getQuantity());
-        cart.setProductDetail(productDetail);
-        cart.setQuantity(cartRequest.getQuantity());
-        cart.setTotalPrice(productDetail.getPrice()*cart.getQuantity());
+    public ResponseEntity<?> updateCart(@RequestParam("quantity")int quantity,@RequestParam("cartId") int cartId){
         try {
+        Cart cart = cartSevice.findById(cartId);
+        if (quantity>0){
+            cart.setQuantity(quantity);
+            cart.setTotalPrice(cart.getProductDetail().getPrice()*cart.getQuantity());
             cart = cartSevice.insertCard(cart);
-            return ResponseEntity.ok("Sửa giỏ hàng thành công!!!");
+        }else {
+            cartSevice.deleteCart(cartId);
+        }
+        return ResponseEntity.ok("Sửa giỏ hàng thành công!!!");
         }catch (Exception e){
             return ResponseEntity.ok("Sửa giỏ hàng thất bại!!!");
         }
-
-
-
     }
-
-
-
 }

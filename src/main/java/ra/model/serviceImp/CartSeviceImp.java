@@ -35,4 +35,9 @@ public class CartSeviceImp implements CartSevice {
     public Cart findById(int id) {
         return cartRepository.findById(id).get();
     }
+
+    @Override
+    public List<Cart> findAll(int id) {
+        return cartRepository.findByUsers_UserId(id);
+    }
 }

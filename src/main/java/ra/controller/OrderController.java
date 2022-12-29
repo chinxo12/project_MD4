@@ -16,6 +16,7 @@ import ra.payload.request.ConfirmOrderRequest;
 import ra.payload.request.OrderRequest;
 import ra.payload.response.OrderDetailResponse;
 import ra.payload.response.OrderResponse;
+import ra.payload.response.ShopOrderResponse;
 import ra.security.CustomUserDetails;
 
 import java.text.SimpleDateFormat;
@@ -43,7 +44,7 @@ public class OrderController {
         List<OrderDetailResponse> listResponse = new ArrayList<>();
         for (OrderDetail orderDetail :list) {
             OrderDetailResponse order = new OrderDetailResponse();
-            order.setCartId(orderDetail.getOderDetailId());
+            order.setOrderId(orderDetail.getOderDetailId());
             order.setProductName(orderDetail.getProductDetail().getProduct().getProductName());
             order.setOrderStatus(orderDetail.isOrderStatus());
             order.setPrice(orderDetail.getPrice());
@@ -67,7 +68,7 @@ public class OrderController {
         List<OrderDetailResponse> listResponse = new ArrayList<>();
         for (OrderDetail orderDetail :list) {
             OrderDetailResponse order = new OrderDetailResponse();
-            order.setCartId(orderDetail.getOderDetailId());
+            order.setOrderId(orderDetail.getOderDetailId());
             order.setProductName(orderDetail.getProductDetail().getProduct().getProductName());
             order.setOrderStatus(orderDetail.isOrderStatus());
             order.setPrice(orderDetail.getPrice());
@@ -90,7 +91,7 @@ public class OrderController {
         List<OrderDetailResponse> listResponse = new ArrayList<>();
         for (OrderDetail orderDetail :list) {
             OrderDetailResponse order = new OrderDetailResponse();
-            order.setCartId(orderDetail.getOderDetailId());
+            order.setOrderId(orderDetail.getOderDetailId());
             order.setProductName(orderDetail.getProductDetail().getProduct().getProductName());
             order.setOrderStatus(orderDetail.isOrderStatus());
             order.setPrice(orderDetail.getPrice());
@@ -109,10 +110,10 @@ public class OrderController {
     public ResponseEntity<?> getOrderForShop(){
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<OrderDetail> list = orderDetailSevice.getOrderForShop(customUserDetails.getUserId());
-        List<OrderDetailResponse> listResponse = new ArrayList<>();
+        List<ShopOrderResponse> listResponse = new ArrayList<>();
         for (OrderDetail orderDetail :list) {
-            OrderDetailResponse order = new OrderDetailResponse();
-            order.setCartId(orderDetail.getOderDetailId());
+            ShopOrderResponse order = new ShopOrderResponse();
+            order.setOrderId(orderDetail.getOderDetailId());
             order.setProductName(orderDetail.getProductDetail().getProduct().getProductName());
             order.setOrderStatus(orderDetail.isOrderStatus());
             order.setPrice(orderDetail.getPrice());
@@ -121,7 +122,7 @@ public class OrderController {
             order.setSizeName(orderDetail.getProductDetail().getSize().getSizeName());
             order.setCreateDate(orderDetail.getCreateDate());
             order.setTotalPrice(order.getTotalPrice());
-            order.setShopName(orderDetail.getProductDetail().getProduct().getUsers().getUserName());
+            order.setUserName(orderDetail.getUsers().getUserName());
             listResponse.add(order);
         }
 
@@ -131,10 +132,10 @@ public class OrderController {
     public ResponseEntity<?> getWaitingOrDerForShop(){
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<OrderDetail> list = orderDetailSevice.findAllOrderByStatsus(customUserDetails.getUserId(),false);
-        List<OrderDetailResponse> listResponse = new ArrayList<>();
+        List<ShopOrderResponse> listResponse = new ArrayList<>();
         for (OrderDetail orderDetail :list) {
-            OrderDetailResponse order = new OrderDetailResponse();
-            order.setCartId(orderDetail.getOderDetailId());
+            ShopOrderResponse order = new ShopOrderResponse();
+            order.setOrderId(orderDetail.getOderDetailId());
             order.setProductName(orderDetail.getProductDetail().getProduct().getProductName());
             order.setOrderStatus(orderDetail.isOrderStatus());
             order.setPrice(orderDetail.getPrice());
@@ -143,7 +144,7 @@ public class OrderController {
             order.setSizeName(orderDetail.getProductDetail().getSize().getSizeName());
             order.setCreateDate(orderDetail.getCreateDate());
             order.setTotalPrice(order.getTotalPrice());
-            order.setShopName(orderDetail.getProductDetail().getProduct().getUsers().getUserName());
+            order.setUserName(orderDetail.getUsers().getUserName());
             listResponse.add(order);
         }
 
@@ -153,10 +154,10 @@ public class OrderController {
     public ResponseEntity<?> getSoldOrder(){
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<OrderDetail> list = orderDetailSevice.findAllOrderByStatsus(customUserDetails.getUserId(),true);
-        List<OrderDetailResponse> listResponse = new ArrayList<>();
+        List<ShopOrderResponse> listResponse = new ArrayList<>();
         for (OrderDetail orderDetail :list) {
-            OrderDetailResponse order = new OrderDetailResponse();
-            order.setCartId(orderDetail.getOderDetailId());
+            ShopOrderResponse order = new ShopOrderResponse();
+            order.setOrderId(orderDetail.getOderDetailId());
             order.setProductName(orderDetail.getProductDetail().getProduct().getProductName());
             order.setOrderStatus(orderDetail.isOrderStatus());
             order.setPrice(orderDetail.getPrice());
@@ -165,7 +166,7 @@ public class OrderController {
             order.setSizeName(orderDetail.getProductDetail().getSize().getSizeName());
             order.setCreateDate(orderDetail.getCreateDate());
             order.setTotalPrice(order.getTotalPrice());
-            order.setShopName(orderDetail.getProductDetail().getProduct().getUsers().getUserName());
+            order.setUserName(orderDetail.getUsers().getUserName());
             listResponse.add(order);
         }
 

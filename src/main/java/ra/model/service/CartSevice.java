@@ -11,6 +11,7 @@ public interface CartSevice {
     void deleteCart(int id);
     int getTotalList(int id,int size);
     Cart findById(int id);
+    List<Cart> findAll(int id);
 
 
 }
