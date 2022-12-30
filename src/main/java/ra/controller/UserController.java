@@ -118,7 +118,7 @@ public class UserController {
 
         return ResponseEntity.ok("dasd");
     }
-    @PutMapping("{addToWishList/productId}")
+    @PutMapping("addWishList/{productId}")
     public ResponseEntity<?> addToWishList(@PathVariable("productId")int productId){
         Product product = productSevice.findById(productId);
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -151,5 +151,6 @@ public class UserController {
             return ResponseEntity.ok("Có lỗi trong quá trình xử lý vui lòng thử lại!");
         }
     }
+
 
 }

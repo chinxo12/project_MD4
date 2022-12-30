@@ -60,9 +60,41 @@ public interface ProductRepository extends JpaRepository<Product,Integer> {
     @Query(value = "select ceil(count(productId)/:size1) from product p where p.userId= :uId",nativeQuery = true)
     int totalPage(@Param("uId")int id,@Param("size1")int size);
 
-    @Query(value = "p.productId, p.productImage, p.discription, p.userId, p.catalogId, p.productStatus,p.productName " +
+    @Query(value = "select p.productId, p.productImage, p.discription, p.userId, p.catalogId, p.productStatus,p.productName " +
             "from product p join productdetail p2 on p.productId = p2.productId " +
             "where p2.productDetailID = :proId",nativeQuery = true)
     Product getProductByProducDetailId(@Param("proId")int proId);
 
+    @Query(value = "select p.productId, p.productImage, p.discription, p.userId, p.catalogId, p.productStatus,p.productName\n" +
+            "from product p join catalog c on c.catalogId = p.catalogId\n" +
+            "where   p.catalogId  in  (WITH recursive TEMPDATA(catId, catName)\n" +
+            "                                             AS (SELECT a.catalogId,\n" +
+            "                                                        a.catalogName\n" +
+            "                                                 FROM catalog a\n" +
+            "                                                 WHERE catalogId = :cId\n" +
+            "                                                 union all\n" +
+            "                                                 select child.catalogId, child.catalogName\n" +
+            "                                                 from TEMPDATA p\n" +
+            "                                                          inner join catalog child on p.catId = child.parentId)\n" +
+            "                          SELECT catId\n" +
+            "                          FROM TEMPDATA )\n" +
+            "group by p.productId\n" +
+            "order by productId limit :size1 offset :page",nativeQuery = true)
+    List<Product> findByCatalogId(@Param("cId")int catalogId,@Param("page")int page,@Param("size1")int size);
+    @Query(value = "select ceil(count(p.productId)/ :size1)\n" +
+            "from product p  join catalog c on c.catalogId = p.catalogId\n" +
+            "where   p.catalogId  in  (WITH recursive TEMPDATA(catId, catName)\n" +
+            "                                             AS (SELECT a.catalogId,\n" +
+            "                                                        a.catalogName\n" +
+            "                                                 FROM catalog a\n" +
+            "                                                 WHERE catalogId = :cId\n" +
+            "                                                 union all\n" +
+            "                                                 select child.catalogId, child.catalogName\n" +
+            "                                                 from TEMPDATA p\n" +
+            "                                                          inner join catalog child on p.catId = child.parentId)\n" +
+            "                          SELECT catId\n" +
+            "                          FROM TEMPDATA )",nativeQuery = true)
+    int getTotalPageForFindByCatalog(@Param("cId")int catId,@Param("size1")int size);
+    @Query(value = "select * from product p join wishlist w on p.productId = w.productId where w.userId = :uId",nativeQuery = true)
+    List<Product> getAllWishList(@Param("uId") int userId);
 }

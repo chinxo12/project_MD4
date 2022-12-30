@@ -88,10 +88,7 @@ public class ProductSeviceImp implements ProductSevice<Product, Integer> {
             return productRepository.softByPriceASC(userId,page,size);
         } else {
             return productRepository.softByPriceDESC(userId,page,size);
-
         }
-
-
     }
 
     @Override
@@ -102,5 +99,20 @@ public class ProductSeviceImp implements ProductSevice<Product, Integer> {
     @Override
     public Product getByProductDetailId(int id) {
         return productRepository.getProductByProducDetailId(id);
+    }
+
+    @Override
+        public List<Product> findAllByCatalogId(int catalogId, int page, int size) {
+            return productRepository.findByCatalogId(catalogId,page,size);
+    }
+
+    @Override
+    public int getTotalPageForFindByCatalog(int catalogId, int size) {
+        return productRepository.getTotalPageForFindByCatalog(catalogId,size);
+    }
+
+    @Override
+    public List<Product> getAllWishList(int userId) {
+        return productRepository.getAllWishList(userId);
     }
 }

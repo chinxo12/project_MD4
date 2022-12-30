@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@PreAuthorize("hasRole('USER')")
+
 @CrossOrigin("http://localhost:8080")
 @RequestMapping("/api/v1/auth/product")
 public class ProductController {
@@ -188,6 +188,7 @@ public class ProductController {
             return ResponseEntity.ok("Có lỗi trong quá trình xử lý vui lòng thử lại!!!");
         }
     }
+
     @PutMapping("deleteProduct/{productId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> deleteProduct(@PathVariable("productId") int productId){
@@ -471,6 +472,59 @@ public class ProductController {
 
         return ResponseEntity.ok(displayValue);
     }
+    @GetMapping("findByCatalog/{catalogId}")
+    public ResponseEntity<?> findByCatalogId(@PathVariable("catalogId")int catalogId,
+                                             @RequestParam(defaultValue = "0") int page,
+                                             @RequestParam(defaultValue = "3") int size){
+        List<Product> listProduct = productSevice.findAllByCatalogId(catalogId,page,size);
+        List<DisplayProduct> list = new ArrayList<>();
+        for (Product pro :listProduct) {
+            DisplayProduct displayProduct = new DisplayProduct();
+            displayProduct.setProductId(pro.getProductId());
+            displayProduct.setProductName(pro.getProductName());
+            displayProduct.setProductStatus(pro.isProductStatus());
+            displayProduct.setCatalog(pro.getCatalog());
+            int productAvailable = 0;
+            int star = 0;
+            int count = 0;
+            for (ProductDetail proDetail :pro.getListProductDetail()) {
+                ProductDetailResponse proDetailResponse = new ProductDetailResponse();
+                proDetailResponse.setProductDetailId(proDetail.getProductDetailId());
+                proDetailResponse.setSizeName(proDetail.getSize().getSizeName());
+                proDetailResponse.setColorName(proDetail.getColor().getColorName());
+                proDetailResponse.setQuantity(proDetail.getQuantity());
+                proDetailResponse.setSoldQuantity(proDetail.getSoldQuantity());
+                proDetailResponse.setPrice(proDetail.getPrice());
+                displayProduct.getListProductDetail().add(proDetailResponse);
+                for (FeedBack feedBack :proDetail.getListFeedBack()) {
+                    FeedBackResponse feedBackResponse = new FeedBackResponse();
+                    feedBackResponse.setStar(feedBack.getStar());
+                    feedBackResponse.setUserName(feedBack.getUsers().getUserName());
+                    feedBackResponse.setSizeName(feedBack.getProductDetail().getSize().getSizeName());
+                    feedBackResponse.setColorName(feedBack.getProductDetail().getColor().getColorName());
+                    for (ImageFeedBack images :feedBack.getListImage()) {
+                        feedBackResponse.getListImage().add(images.getImageLink());
+                    }
+                    displayProduct.getListFeedBack().add(feedBackResponse);
+                    star+=feedBack.getStar();
+                    count++;
+                }
+                productAvailable+=proDetail.getQuantity();
+            }
+            displayProduct.setProductAvailable(productAvailable);
+            if (count!=0){
+                displayProduct.setStars(star/count);
+            }
+            list.add(displayProduct);
+        }
+
+        Map<String,Object> displayValue = new HashMap<>();
+        int totalPage = productSevice.getTotalPageForFindByCatalog(catalogId,size);
+        displayValue.put("totalPage",totalPage);
+        displayValue.put("listProduct",list);
+
+        return ResponseEntity.ok(displayValue);
+    }
     @GetMapping("/{productId}")
     public ResponseEntity<?> getById(@PathVariable("productId") int id){
         Product pro = productSevice.findById(id);
@@ -534,6 +588,52 @@ public class ProductController {
             e.printStackTrace();
             return ResponseEntity.ok("Thêm phản hồi thất bại!");
         }
+    }
 
+    @GetMapping("getAllWishList")
+    public ResponseEntity<?> getAllWishList(){
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<Product> listProduct = productSevice.getAllWishList(customUserDetails.getUserId());
+        List<DisplayProduct> list = new ArrayList<>();
+        for (Product pro :listProduct) {
+            DisplayProduct displayProduct = new DisplayProduct();
+            displayProduct.setProductId(pro.getProductId());
+            displayProduct.setProductName(pro.getProductName());
+            displayProduct.setProductStatus(pro.isProductStatus());
+            displayProduct.setCatalog(pro.getCatalog());
+            int productAvailable = 0;
+            int star = 0;
+            int count = 0;
+            for (ProductDetail proDetail :pro.getListProductDetail()) {
+                ProductDetailResponse proDetailResponse = new ProductDetailResponse();
+                proDetailResponse.setProductDetailId(proDetail.getProductDetailId());
+                proDetailResponse.setSizeName(proDetail.getSize().getSizeName());
+                proDetailResponse.setColorName(proDetail.getColor().getColorName());
+                proDetailResponse.setQuantity(proDetail.getQuantity());
+                proDetailResponse.setSoldQuantity(proDetail.getSoldQuantity());
+                proDetailResponse.setPrice(proDetail.getPrice());
+                displayProduct.getListProductDetail().add(proDetailResponse);
+                for (FeedBack feedBack :proDetail.getListFeedBack()) {
+                    FeedBackResponse feedBackResponse = new FeedBackResponse();
+                    feedBackResponse.setStar(feedBack.getStar());
+                    feedBackResponse.setUserName(feedBack.getUsers().getUserName());
+                    feedBackResponse.setSizeName(feedBack.getProductDetail().getSize().getSizeName());
+                    feedBackResponse.setColorName(feedBack.getProductDetail().getColor().getColorName());
+                    for (ImageFeedBack images :feedBack.getListImage()) {
+                        feedBackResponse.getListImage().add(images.getImageLink());
+                    }
+                    displayProduct.getListFeedBack().add(feedBackResponse);
+                    star+=feedBack.getStar();
+                    count++;
+                }
+                productAvailable+=proDetail.getQuantity();
+            }
+            displayProduct.setProductAvailable(productAvailable);
+            if (count!=0){
+                displayProduct.setStars(star/count);
+            }
+            list.add(displayProduct);
+        }
+        return ResponseEntity.ok(list);
     }
 }

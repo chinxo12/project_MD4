@@ -36,4 +36,5 @@ public class Product {
     @OneToMany(fetch = FetchType.EAGER,mappedBy = "product")
     List<ProductDetail> listProductDetail = new ArrayList<>();
 
+
 }
