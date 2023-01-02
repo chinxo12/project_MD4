@@ -34,6 +34,5 @@ public class ProductDetail {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "colorId")
     private Color color;
-    @OneToMany(mappedBy = "productDetail")
-    List<FeedBack> listFeedBack = new ArrayList<>();
+
 }

@@ -7,4 +7,5 @@ import java.util.List;
 public class OrderRequest {
     private List<Integer> listCart;
     private List<Integer> listQuantity;
+    private int addressId;
 }

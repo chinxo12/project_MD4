@@ -27,9 +27,15 @@ public class OrderDetail {
     @JoinColumn(name = "productDetailId")
     private ProductDetail productDetail;
     @Column(name = "orderStatus")
-    private boolean orderStatus;
+    private int orderStatus;
     @Column(name = "createDate")
     private Date createDate;
     @Column(name = "price")
     private float price;
+    @Column(name = "fullName")
+    private String fullName;
+    @Column(name = "address")
+    private String address;
+    @Column(name = "phoneNumber")
+    private String phoneNumber;
 }

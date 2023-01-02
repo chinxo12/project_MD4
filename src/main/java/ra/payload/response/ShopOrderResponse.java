@@ -13,6 +13,6 @@ public class ShopOrderResponse {
     private String sizeName;
     private String ColorName;
     private Date createDate;
-    private boolean orderStatus;
+    private int orderStatus;
     private String userName;
 }

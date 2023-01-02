@@ -23,7 +23,7 @@ public class OrderDetailSeviceImp implements OrderDetailSevice {
     }
 
     @Override
-    public List<OrderDetail> findAllByStatus(int id, boolean status) {
+    public List<OrderDetail> findAllByStatus(int id, int status) {
           return orderDetailRepository.findByUsers_UserIdAndAndOrderStatus(id,status);
     }
 
@@ -38,8 +38,13 @@ public class OrderDetailSeviceImp implements OrderDetailSevice {
     }
 
     @Override
-    public List<OrderDetail> findAllOrderByStatsus(int id, boolean status) {
+    public List<OrderDetail> findAllOrderByStatsus(int id, int status) {
         return orderDetailRepository.getOrderForShopByStatus(id,status);
+    }
+
+    @Override
+    public OrderDetail findByProductIdAndUserId(int userId, int proId) {
+        return orderDetailRepository.findByUsers_UserIdAndProductId(userId,proId);
     }
 
 

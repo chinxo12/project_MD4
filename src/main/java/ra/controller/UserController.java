@@ -11,15 +11,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import ra.jwt.JwtTokenProvider;
-import ra.model.entity.ERole;
-import ra.model.entity.Product;
-import ra.model.entity.Roles;
-import ra.model.entity.Users;
+import ra.model.entity.*;
+import ra.model.service.AddressSevice;
 import ra.model.service.ProductSevice;
 import ra.model.service.RoleService;
 import ra.model.service.UserService;
-import ra.payload.request.LoginRequest;
-import ra.payload.request.SignupRequest;
+import ra.payload.request.*;
 import ra.payload.response.JwtResponse;
 import ra.payload.response.MessageResponse;
 import ra.security.CustomUserDetails;
@@ -47,6 +44,8 @@ public class UserController {
     private PasswordEncoder encoder;
     @Autowired
     private ProductSevice<Product,Integer> productSevice;
+    @Autowired
+    private AddressSevice addressSevice;
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest) {
         if (userService.existsByUserName(signupRequest.getUserName())) {
@@ -99,24 +98,48 @@ public class UserController {
     }
     @PostMapping("/signin")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest){
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUserName(),loginRequest.getPassword())
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        CustomUserDetails customUserDetail = (CustomUserDetails) authentication.getPrincipal();
-        //Sinh JWT tra ve client
-        String jwt = tokenProvider.generateToken(customUserDetail);
-        //Lay cac quyen cua user
-        List<String> listRoles = customUserDetail.getAuthorities().stream()
-                .map(item->item.getAuthority()).collect(Collectors.toList());
-        return ResponseEntity.ok(new JwtResponse(jwt,customUserDetail.getUserId(),customUserDetail.getUsername(),customUserDetail.getEmail(),
-                customUserDetail.getPhone(),listRoles));
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUserName(),loginRequest.getPassword())
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            CustomUserDetails customUserDetail = (CustomUserDetails) authentication.getPrincipal();
+            //Sinh JWT tra ve client
+            String jwt = tokenProvider.generateToken(customUserDetail);
+            //Lay cac quyen cua user
+            List<String> listRoles = customUserDetail.getAuthorities().stream()
+                    .map(item->item.getAuthority()).collect(Collectors.toList());
+            return ResponseEntity.ok(new JwtResponse(jwt,customUserDetail.getUserId(),customUserDetail.getUsername(),customUserDetail.getEmail(),
+                    customUserDetail.getPhone(),listRoles));
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.ok("Sai tên đăng nhập hoặc mật khẩu!");
+        }
+
     }
     @PreAuthorize("hasRole('USER')")
     @PostMapping("changePassword")
-    public ResponseEntity<?> changePassWord(){
+    public ResponseEntity<?> changePassWord(@RequestBody ChangePasswordRequest changePasswordRequest){
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Users users = userService.findById(customUserDetails.getUserId());
+        boolean check = encoder.matches(changePasswordRequest.getOldPassword(),users.getPassword());
+        if (check){
+            users.setPassword(encoder.encode(changePasswordRequest.getNewPassword()));
+            try {
+                userService.saveOrUpdate(users);
+            }catch (Exception e){
+                e.printStackTrace();
+                check = false;
+            }
+        }else {
+            return ResponseEntity.ok("Mật khẩu cũ không chính xác!");
+        }
+        if (check){
+            return ResponseEntity.ok("Đổi mật khẩu thành công!");
+        }else {
+            return ResponseEntity.ok("Có lỗi trong quá trình xử lỹ vui lòng thử lại!!");
+        }
 
-        return ResponseEntity.ok("dasd");
     }
     @PutMapping("addWishList/{productId}")
     public ResponseEntity<?> addToWishList(@PathVariable("productId")int productId){
@@ -151,6 +174,66 @@ public class UserController {
             return ResponseEntity.ok("Có lỗi trong quá trình xử lý vui lòng thử lại!");
         }
     }
+    @PutMapping("update")
+    public ResponseEntity<?> updateUser(@RequestBody UserUpdateRequest userUpdateRequest){
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Users user = userService.findById(customUserDetails.getUserId());
+        user.setPhone(userUpdateRequest.getPhoneNumber());
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            user.setDateOfBirth(sdf.parse(userUpdateRequest.getBirthDate()));
+            userService.saveOrUpdate(user);
+            return ResponseEntity.ok("Đã cập nhật thông tin thành công!");
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return ResponseEntity.ok("Cập nhật thông tin thất bại!");
+        }
+    }
+    @PostMapping("addAddress")
+    public ResponseEntity<?> addAddress(@RequestBody AddressRequest addressRequest){
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Users user = userService.findById(customUserDetails.getUserId());
+        Address address = new Address();
+        address.setAddress(addressRequest.getAddress());
+        address.setFullName(addressRequest.getFullName());
+        address.setPhoneNumber(addressRequest.getPhoneNumber());
+        address.setUsers(user);
+        try {
+            addressSevice.saveOrUpdate(address);
+            return ResponseEntity.ok("Đã thêm địa chỉ nhận hàng thành công!");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.ok("Thêm địa chỉ nhận hàng thất bại!");
+        }
+    }
+    @PutMapping("updateAddress/{addressId}")
+    public ResponseEntity<?> updateAddress(@RequestBody AddressRequest addressRequest,@PathVariable("addressId") int addressId){
+
+        Address address = addressSevice.findById(addressId);
+        address.setAddress(addressRequest.getAddress());
+        address.setFullName(addressRequest.getFullName());
+        address.setPhoneNumber(address.getPhoneNumber());
+        try {
+            addressSevice.saveOrUpdate(address);
+            return ResponseEntity.ok("Đã cập nhật địa chỉ nhận hàng thành công!");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.ok("Cập nhật địa chỉ nhận hàng thất bại!");
+        }
+    }
+
+    @PutMapping("delete/{addressId}")
+    public ResponseEntity<?> deleteAddress(@PathVariable("addressId") int addressId){
+
+        try {
+            addressSevice.delete(addressId);
+            return ResponseEntity.ok("Đã xóa địa chỉ nhận hàng thành công!");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.ok("Xóa địa chỉ nhận hàng thất bại!");
+        }
+    }
+
 
 
 }

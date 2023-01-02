@@ -14,6 +14,6 @@ public class OrderDetailResponse {
     private String sizeName;
     private String ColorName;
     private Date createDate;
-    private boolean orderStatus;
+    private int orderStatus;
     private String shopName;
 }

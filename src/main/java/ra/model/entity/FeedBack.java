@@ -23,8 +23,8 @@ public class FeedBack {
     private Users users;
     @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnore
-    @JoinColumn(name = "productDetailId")
-    private ProductDetail productDetail;
+    @JoinColumn(name = "productId")
+    private Product product;
     @OneToMany(mappedBy = "feedBack")
     private List<ImageFeedBack> listImage = new ArrayList<>();
     private int star;

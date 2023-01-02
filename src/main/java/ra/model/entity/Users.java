@@ -28,6 +28,12 @@ public class Users {
     private String phone;
     @Column(name = "UserStatus")
     private boolean userStatus;
+    @Column(name = "fullname")
+    private String fullName;
+    @Column(name = "dateOfBirth")
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private Date dateOfBirth;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "User_Role",joinColumns = @JoinColumn(name = "UserId"),
             inverseJoinColumns = @JoinColumn(name = "RoleId"))
@@ -39,4 +45,6 @@ public class Users {
     @JoinTable(name = "wishlist",joinColumns = @JoinColumn(name = "userId"),
             inverseJoinColumns = @JoinColumn(name = "productId"))
     private Set<Product> wishList = new HashSet<>();
+    @OneToMany(mappedBy = "users")
+    List<Address> listAddress = new ArrayList<>();
 }
